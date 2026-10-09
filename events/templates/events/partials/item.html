@@ -6,10 +6,12 @@
     {# Name, count and admin icons share one line; they wrap only when the name is long. #}
     <div class="item-head">
       <p class="item-name">{{ item.name }}</p>
+      {% if not item.is_custom %}{# A written-in item is one person's own dish; a count would only ever say "1 of 1". #}
       <span class="item-count">
         {% if item.slots is None %}Unlimited{% if st.count %} · {{ st.count }} signed up{% endif %}{% else %}{{ st.count }} of {{ item.slots }} signed up{% endif %}
         {% if st.over %}<span class="badge over">Oversubscribed</span>{% elif st.full %}<span class="badge full">Full</span>{% endif %}
       </span>
+      {% endif %}
       {% if is_admin %}{% include "events/manage/partials/item_controls.html" %}{% endif %}
     </div>
     {% if item.description %}<p class="item-description">{{ item.description }}</p>{% endif %}
