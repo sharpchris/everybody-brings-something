@@ -277,3 +277,14 @@ def test_email_field_light_validation(event, value, ok):
     assert form.is_valid() is ok
     if not ok:
         assert form.errors[email.form_key] == ["Enter an email address, like name@example.com."]
+
+
+def test_stored_secret_is_generated_once_and_private(tmp_path):
+    from config.keys import stored_secret
+
+    path = tmp_path / ".admin-key"
+    first, created = stored_secret(path)
+    again, created_again = stored_secret(path)
+    assert created and not created_again
+    assert first == again and len(first) >= 40
+    assert path.stat().st_mode & 0o777 == 0o600

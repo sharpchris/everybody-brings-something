@@ -39,7 +39,8 @@ WORKDIR /app
 COPY --from=builder /app /app
 
 # Collect static files at build time. The dummy key is only used for this step.
-RUN DEBUG=0 SECRET_KEY=build-only-dummy DATABASE_PATH=/tmp/build.sqlite3 \
+# ADMIN_KEY=off keeps a real key from being generated into the image.
+RUN DEBUG=0 SECRET_KEY=build-only-dummy ADMIN_KEY=off DATABASE_PATH=/tmp/build.sqlite3 \
     python manage.py collectstatic --noinput
 
 # No USER here: the entrypoint starts as root only to make /data writable (Railway and

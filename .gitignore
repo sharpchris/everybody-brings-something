@@ -28,3 +28,5 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+.secret-key
+.admin-key

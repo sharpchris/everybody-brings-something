@@ -1,6 +1,9 @@
 import os
 
 os.environ.setdefault("DEBUG", "1")
+# Fixed keys, so tests never generate key files in the repo.
+os.environ.setdefault("SECRET_KEY", "test-secret-key")
+os.environ.setdefault("ADMIN_KEY", "test-admin-key")
 
 from .settings import *  # noqa: E402,F403
 

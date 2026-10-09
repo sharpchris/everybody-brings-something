@@ -4,10 +4,13 @@ All deploy-specific values come from environment variables (see README).
 """
 
 import os
+import sys
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
+
+from .keys import stored_secret
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,15 +26,29 @@ def env_list(name, default=""):
 
 
 DEBUG = env_bool("DEBUG", default=False)
-SECRET_KEY = os.environ.get("SECRET_KEY", "")
-if not SECRET_KEY:
-    if not DEBUG:
-        raise RuntimeError("SECRET_KEY must be set when DEBUG is off")
-    SECRET_KEY = "dev-insecure-secret-key"
 
-# Visiting any page with ?admin=<ADMIN_KEY> unlocks admin mode. Empty disables admin.
-ADMIN_KEY = os.environ.get("ADMIN_KEY", "")
-if ADMIN_KEY and not DEBUG and len(ADMIN_KEY) < 20:
+DATABASE_PATH = Path(os.environ.get("DATABASE_PATH") or BASE_DIR / "db.sqlite3")
+# Fail loudly rather than let SQLite error later (or write to an ephemeral
+# disk) when the data volume isn't mounted where DATABASE_PATH expects.
+if not DATABASE_PATH.parent.is_dir():
+    raise ImproperlyConfigured(
+        f"DATABASE_PATH directory {DATABASE_PATH.parent} does not exist (is the volume mounted?)"
+    )
+
+# Keys not set in the environment are generated once and kept next to the database
+# (the /data volume in Docker), so they survive restarts and upgrades.
+DATA_DIR = DATABASE_PATH.parent
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "").strip() or stored_secret(DATA_DIR / ".secret-key")[0]
+
+# Visiting any page with ?admin=<ADMIN_KEY> unlocks admin mode. ADMIN_KEY=off disables it.
+ADMIN_KEY = os.environ.get("ADMIN_KEY", "").strip()
+ADMIN_KEY_CREATED = False
+if ADMIN_KEY.lower() in {"off", "disabled", "none"}:
+    ADMIN_KEY = ""
+elif not ADMIN_KEY:
+    ADMIN_KEY, ADMIN_KEY_CREATED = stored_secret(DATA_DIR / ".admin-key")
+elif not DEBUG and len(ADMIN_KEY) < 20:
     raise RuntimeError("ADMIN_KEY must be at least 20 characters when DEBUG is off")
 
 # The public address people use, e.g. https://signup.example.org or http://192.168.1.20:8000.
@@ -40,6 +57,15 @@ ON_RAILWAY = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
 SITE_URL = os.environ.get("SITE_URL", "").strip().rstrip("/")
 if not SITE_URL and os.environ.get("RAILWAY_PUBLIC_DOMAIN"):
     SITE_URL = f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}"
+
+if ADMIN_KEY_CREATED:
+    # Shown once, the first time the key is generated. `manage.py admin_link` shows it again.
+    print(
+        f"\nAdmin link: {SITE_URL or 'http://localhost:8000'}/?admin={ADMIN_KEY}\n"
+        f"(Saved in {DATA_DIR / '.admin-key'}. Show it again with: python manage.py admin_link)\n",
+        file=sys.stderr,
+        flush=True,
+    )
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
@@ -131,13 +157,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASE_PATH = Path(os.environ.get("DATABASE_PATH") or BASE_DIR / "db.sqlite3")
-# Fail loudly rather than let SQLite error later (or write to an ephemeral
-# disk) when the data volume isn't mounted where DATABASE_PATH expects.
-if not DATABASE_PATH.parent.is_dir():
-    raise ImproperlyConfigured(
-        f"DATABASE_PATH directory {DATABASE_PATH.parent} does not exist (is the volume mounted?)"
-    )
 
 DATABASES = {
     "default": {

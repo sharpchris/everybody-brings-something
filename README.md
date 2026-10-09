@@ -40,18 +40,16 @@ curl -fsSLO https://raw.githubusercontent.com/sharpchris/everybody-brings-someth
 curl -fsSL -o .env https://raw.githubusercontent.com/sharpchris/everybody-brings-something/main/.env.example
 ```
 
-Edit `.env`:
+In `.env`, set `SITE_URL` to the address people will use, such as `https://signup.example.org` or `http://192.168.1.20:8000`. Leave it empty to try it out on `http://localhost:8000`.
 
-- `SECRET_KEY` and `ADMIN_KEY`: generate each with `openssl rand -hex 32` (or `python3 -c "import secrets; print(secrets.token_urlsafe(40))"`). Use one of these URL-safe forms; the admin key goes in a web address.
-- `SITE_URL`: the address people will use, such as `https://signup.example.org` or `http://192.168.1.20:8000`. Leave it empty to try it out on `http://localhost:8000`.
-
-Then start it:
+Then start it and get your admin link:
 
 ```sh
 docker compose up -d
+docker compose exec web python manage.py admin_link
 ```
 
-Open `<SITE_URL>/?admin=<ADMIN_KEY>` (or `http://localhost:8000/?admin=<ADMIN_KEY>`) to unlock admin mode and create your first event. The database lives in the `data` volume, and migrations run automatically on every start.
+Open that link to unlock admin mode and create your first event. On first start the app generates a random admin key and secret key and keeps them in the `data` volume with the database, so they survive restarts and upgrades; the admin link is also printed once in `docker compose logs`. Migrations run automatically on every start.
 
 Running the image without compose? Mount a volume at `/data`, or the database is lost when the container is removed:
 
@@ -65,8 +63,8 @@ All settings are environment variables, read from `.env` by `docker compose`.
 
 | Variable | Default | Notes |
 |---|---|---|
-| `SECRET_KEY` | none | Required. Signs sessions and attendee cookies. Changing it signs everyone out. |
-| `ADMIN_KEY` | empty | The `?admin=` key, at least 20 characters. Empty disables admin mode. |
+| `SECRET_KEY` | generated | Signs sessions and attendee cookies. If unset, a random one is generated on first start and kept in `/data/.secret-key`. Changing it signs everyone out. |
+| `ADMIN_KEY` | generated | The `?admin=` key. If unset, a random one is generated on first start and kept in `/data/.admin-key` (`manage.py admin_link` prints the link). If you set your own: at least 20 URL-safe characters (e.g. `openssl rand -hex 32`). `off` disables admin mode. |
 | `SITE_URL` | empty | The public address, e.g. `https://signup.example.org`. Sets the allowed host, the trusted CSRF origin and the `HTTPS` default. |
 | `HTTPS` | on if `SITE_URL` (or a `CSRF_TRUSTED_ORIGINS` entry) is `https://`, or `BEHIND_PROXY` is on | HTTPS-only cookies, plus HSTS on requests the app knows are HTTPS (needs `BEHIND_PROXY`). Set `0` for plain HTTP, `1` to force on. |
 | `BEHIND_PROXY` | `0` (`1` on Railway) | Trust `X-Forwarded-Proto` from a reverse proxy that terminates TLS. Only enable when the app is reachable solely through the proxy. |
@@ -121,10 +119,11 @@ These are stored in the database, so they survive upgrades and restarts.
 ## How admin mode works
 
 - There are no accounts. Visiting any page with `?admin=<ADMIN_KEY>` sets a flag in a signed session cookie (30 days), then redirects to the same URL with the key removed so it doesn't linger in history or get shared.
-- A wrong key is silently ignored. An empty `ADMIN_KEY` disables admin mode entirely.
+- A wrong key is silently ignored. `ADMIN_KEY=off` disables admin mode entirely.
+- Lost the link? `docker compose exec web python manage.py admin_link` prints it.
 - While unlocked, an "Admin mode" bar shows at the top with a "Leave admin mode" button.
 - **Guest view** (button on each event page) switches admin mode off for that browser until you click "Exit guest view", with a colored frame so you can't miss it. You're still logged in as admin underneath. Signups you make in guest view are real, recorded as your browser's own attendee.
-- Admin sessions are tied to the current key: rotating or clearing `ADMIN_KEY` logs every admin out immediately.
+- Admin sessions are tied to the current key: changing it logs every admin out immediately. To rotate a generated key, delete `/data/.admin-key` and restart (a new one is generated and printed), or set `ADMIN_KEY` yourself.
 - "Leave admin mode" signs out that browser only; a copy of its cookie would stay valid until it expires. If a device with admin mode is lost or shared, rotate `ADMIN_KEY`.
 - gunicorn's access log omits query strings, so the key isn't written there. A reverse proxy or hosting platform may still log the URL you first visit, so treat the key like a password and rotate it if logs are shared.
 - When `DEBUG` is off, a non-empty `ADMIN_KEY` must be at least 20 characters (the app refuses to start otherwise).
@@ -179,7 +178,7 @@ Migrations run automatically when the container starts. Take a backup first.
 
 1. Create a service from this GitHub repo.
 2. Add a volume yourself; the repo can't create one. In the project canvas, right-click the service (or press `⌘K` / `Ctrl+K`), choose **Attach volume**, and set the mount path to `/data`. The database lives at `/data/db.sqlite3`, so this volume is what keeps your events across deploys and restarts. Without it the deploy won't start (`railway.json` requires the mount), and without that check everything would be wiped on every deploy. Railway mounts volumes as root; the container fixes the ownership on startup, so no extra setting is needed.
-3. Set `SECRET_KEY` and `ADMIN_KEY` under Variables (generated as above). Leave `DEBUG` unset.
+3. Optionally set `SECRET_KEY` and `ADMIN_KEY` under Variables. If you don't, random ones are generated into the volume on first deploy and the admin link appears once in the deploy logs (or run `python manage.py admin_link` in the service's shell). Leave `DEBUG` unset.
 4. Generate a domain under Settings → Networking. `SITE_URL` defaults to `https://$RAILWAY_PUBLIC_DOMAIN` and `BEHIND_PROXY` defaults on. For a custom domain, set `SITE_URL` to it.
 5. Keep the service at 1 replica (SQLite on a volume can't be shared) and turn on backups in the volume's settings.
 
