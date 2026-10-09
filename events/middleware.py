@@ -120,3 +120,17 @@ class SiteSettingsMiddleware:
             return self.get_response(request)
         finally:
             timezone.deactivate()
+
+
+class NoIndexMiddleware:
+    """Tells search engines not to list any page. Event links are private to the people given them,
+    so a link posted somewhere public mustn't make the event show up in search results. (A
+    robots.txt block would stop crawlers from ever seeing this, so there deliberately isn't one.)"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response.headers.setdefault("X-Robots-Tag", "noindex, nofollow")
+        return response

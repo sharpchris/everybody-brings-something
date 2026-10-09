@@ -125,6 +125,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "events.middleware.NoIndexMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

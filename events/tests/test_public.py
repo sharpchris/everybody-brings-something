@@ -507,3 +507,10 @@ def test_unlimited_custom_items(client, event, category):
         Client().post(url, {"item-name": f"Dish {n}", "name": f"P{n}"}, **HX)
     assert Item.objects.filter(is_custom=True).count() == 12
     assert "spots left" not in client.get(f"/{event.slug}/").content.decode()
+
+
+def test_pages_ask_search_engines_not_to_index(client, event):
+    for url in ("/", event.get_absolute_url(), "/no-such-event/"):
+        response = client.get(url)
+        assert response["X-Robots-Tag"] == "noindex, nofollow", url
+    assert '<meta name="robots" content="noindex, nofollow">' in client.get(event.get_absolute_url()).content.decode()
