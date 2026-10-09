@@ -1,0 +1,19 @@
+{# Bottom of the sheet for admins. Context: event, categories. #}
+{% load sheet_tags %}{% default_custom_item_limit as default_limit %}
+<section class="sheet-admin-footer">
+  {% if not categories %}
+    <p class="empty-state">No categories yet. Add one, like Mains, Sides or Desserts, then add items to it.</p>
+  {% endif %}
+  <form id="category-form-new" class="inline-form" method="post" action="{% url 'manage_category_add' event.slug %}"
+        hx-post="{% url 'manage_category_add' event.slug %}" hx-target="#sheet" hx-swap="outerHTML">
+    {% csrf_token %}
+    <label for="newcategory_name">New category</label>
+    <input type="hidden" name="allow_custom_items" value="on">
+    <input type="hidden" name="custom_item_limit" value="{{ default_limit }}">
+    <fieldset role="group">
+      <input type="text" name="name" id="newcategory_name" maxlength="120" required placeholder="e.g. Desserts">
+      <button type="submit">Add category</button>
+    </fieldset>
+    <small class="muted">Attendees can add up to {{ default_limit }} of their own items. To change that or add a description, use Edit category.</small>
+  </form>
+</section>

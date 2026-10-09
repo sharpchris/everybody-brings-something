@@ -1,0 +1,16 @@
+{# First-time signup inside an item row. Context: event, item, signup_form, note_form. Posts back to the claim URL. #}
+<form class="inline-form" method="post" action="{% url 'item_claim' event.slug item.pk %}"
+      hx-post="{% url 'item_claim' event.slug item.pk %}"
+      hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+  {% csrf_token %}
+  <input type="hidden" name="profile" value="1">
+  <p><strong>You're bringing {{ item.name }}</strong></p>
+  {% include "events/partials/form_fields.html" with form=signup_form %}
+  {% include "events/partials/form_fields.html" with form=note_form %}
+  <div class="form-actions">
+    <button type="submit">I'll bring this</button>
+    <a class="btn-link" href="{{ event.get_absolute_url }}#item-{{ item.pk }}"
+       hx-get="{% url 'item_row' event.slug item.pk %}"
+       hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">Cancel</a>
+  </div>
+</form>

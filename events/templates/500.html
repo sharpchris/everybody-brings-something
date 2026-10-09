@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Something went wrong · Everybody Brings Something</title>
+  {# Self-contained on purpose: no template tags, static files or database, so it renders whatever broke. #}
+  <style>
+    :root {
+      --paper: #f6f8f7; --ink: #1d2b36; --soft: #5a6a75; --rule: #cfd8d6; --green: #2e7a4f; --pen: #2446a6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #141c22; --ink: #e6ecee; --soft: #9fb0b8; --rule: #34444d; --green: #5fbf86; --pen: #8fb0ff; }
+    }
+    body {
+      margin: 0; background: var(--paper); color: var(--ink);
+      font: 1.0625rem/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { max-width: 46rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    .wordmark { font-weight: 700; color: var(--ink); text-decoration: none; }
+    .wordmark span { font-family: "Caveat", "Bradley Hand", "Segoe Print", cursive; font-size: 1.4rem; color: var(--pen); }
+    .wordmark .thing { color: var(--green); }
+    h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); line-height: 1.1; letter-spacing: -0.02em; margin: 3rem 0 0.75rem; }
+    p { max-width: 38rem; color: var(--soft); }
+    a.button {
+      display: inline-block; margin-top: 0.5rem; padding: 0.55rem 1rem; border-radius: 0.4rem;
+      border: 1px solid var(--green); color: var(--green); text-decoration: none; font-weight: 600;
+    }
+    a.button:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="wordmark" href="/"><span>Everybody</span> brings <span class="thing">something</span></a>
+    <h1>Something went wrong on our end</h1>
+    <p>Your last change may not have saved. Wait a moment, then reload the page.
+      If it keeps happening, let the organizer know.</p>
+    <a class="button" href="javascript:location.reload()">Reload the page</a>
+  </main>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{# Renders `form` with Pico-friendly markup. #}
+{% for error in form.non_field_errors %}<p class="flash error">{{ error }}</p>{% endfor %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+{% for field in form.visible_fields %}
+  <div class="form-field field-{{ field.name }}">
+  {% if field.widget_type == "checkbox" %}
+    <label for="{{ field.id_for_label }}">{{ field }} {{ field.label }}</label>
+  {% elif field.widget_type == "radioselect" %}
+    <fieldset class="choice-group">
+      <legend>{{ field.label }}</legend>
+      {% for choice in field %}<label for="{{ choice.id_for_label }}">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+    </fieldset>
+  {% else %}
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+  {% endif %}
+  {% if field.help_text %}<small class="muted" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</small>{% endif %}
+  {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+  </div>
+{% endfor %}

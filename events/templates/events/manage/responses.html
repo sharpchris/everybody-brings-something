@@ -1,0 +1,10 @@
+{% extends "events/manage/base.html" %}
+{% block title %}Responses · {{ event.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Responses</h1>
+  <p>{{ event.title }} · {{ rows|length }} {{ rows|length|pluralize:"person,people" }} signed up</p>
+</hgroup>
+<p class="muted">You see every answer here, including private ones. Attendees only see fields marked public.</p>
+{% include "events/manage/partials/responses_table.html" %}
+{% endblock %}

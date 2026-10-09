@@ -1,0 +1,6 @@
+{% extends "events/base.html" %}
+{% block admin_links %}{% if event.pk %}
+    <a href="{% url 'manage_event_settings' event.slug %}">Event settings</a>
+    <a href="{% url 'manage_event_responses' event.slug %}">Responses</a>
+    <a href="{{ event.get_absolute_url }}">View sheet</a>
+{% endif %}{% endblock %}

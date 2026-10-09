@@ -1,0 +1,24 @@
+{# "Bring something else" form, opened inside the category's write-in row. Context: event, category, custom_form, signup_form (None when the attendee has a profile). #}
+<form class="inline-form" method="post" action="{% url 'category_custom_item' event.slug category.pk %}"
+      hx-post="{% url 'category_custom_item' event.slug category.pk %}"
+      hx-target="#category-{{ category.pk }}" hx-swap="outerHTML">
+  {% csrf_token %}
+  <p><strong>Bring something else to {{ category.name }}</strong></p>
+  {# Name first, then what they're bringing, the event's other questions, and the note last. #}
+  {% for error in custom_form.non_field_errors %}<p class="flash error" role="alert">{{ error }}</p>{% endfor %}
+  {% if signup_form %}
+    {% for error in signup_form.non_field_errors %}<p class="flash error" role="alert">{{ error }}</p>{% endfor %}
+    {% include "events/partials/field.html" with field=signup_form.name %}
+  {% endif %}
+  {% include "events/partials/field.html" with field=custom_form.name %}
+  {% if signup_form %}
+    {% for field in signup_form %}{% if field.name != "name" %}{% include "events/partials/field.html" %}{% endif %}{% endfor %}
+  {% endif %}
+  {% include "events/partials/field.html" with field=custom_form.note %}
+  <div class="form-actions">
+    <button type="submit">Add it</button>
+    <a class="btn-link" href="{{ event.get_absolute_url }}#category-{{ category.pk }}"
+       hx-get="{% url 'category_row' event.slug category.pk %}"
+       hx-target="#category-{{ category.pk }}" hx-swap="outerHTML">Cancel</a>
+  </div>
+</form>

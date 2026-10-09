@@ -1,0 +1,36 @@
+{% extends "events/base.html" %}
+{% load sheet_tags %}
+
+{% block content %}
+{% if is_admin %}
+  <header class="event-header">
+    <h1>Your events</h1>
+    <p><a href="{% url 'manage_event_new' %}" role="button">New event</a></p>
+  </header>
+  {% if events %}
+    <ul class="slot-lines">
+      {% for event in events %}
+        <li class="slot">
+          <span>
+            <a href="{{ event.get_absolute_url }}"><strong>{{ event.title }}</strong></a>
+            <span class="signer-extra">{% if event.starts_at %}{{ event|event_when }}{% else %}No date set{% endif %}{% if event.location %} · {{ event.location }}{% endif %}</span>
+          </span>
+          <a class="btn-link" href="{{ event.get_absolute_url }}">Open sheet</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-state">No events yet. Create one and share its link with your attendees.</p>
+  {% endif %}
+{% else %}
+  <header class="event-header">
+    <h1><span class="hand">Everybody</span> brings <span class="hand thing">something</span>{% if site.organization %}<span class="org">{{ site.organization }}</span>{% endif %}</h1>
+    <p class="event-description">A simple signup sheet for potlucks and outings, so everyone knows who's bringing the chips.</p>
+  </header>
+  {% if site.home_message %}
+    <div class="empty-state home-message">{{ site.home_message|linebreaks }}</div>
+  {% else %}
+    <p class="empty-state">To sign up, open the event link your organizer shared with you. If you don't have it, ask them to send it again.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,64 @@
+{# Every attendee with all field values (public and private) and claims. Context: event, fields, rows. #}
+<div id="responses">
+{% if rows %}
+  <div class="table-scroll">
+    <table class="striped">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          {% for field in fields %}
+            <th scope="col">{{ field.label }}
+              {% if field.is_public %}<span class="badge">public</span>{% else %}<span class="badge private">private</span>{% endif %}</th>
+          {% endfor %}
+          <th scope="col">Signed up for</th>
+          <th scope="col">Signed up</th>
+          <th scope="col"><span hidden>Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in rows %}{% with attendee=row.attendee %}
+        <tr id="attendee-{{ attendee.pk }}">
+          <th scope="row">{{ attendee.name }}</th>
+          {% for value in row.values %}
+            <td>{% if value.value %}{{ value.display }}{% else %}<span class="muted">–</span>{% endif %}</td>
+          {% endfor %}
+          <td>
+            {% with claims=attendee.claims.all %}
+            {% if claims %}
+              <ul>
+              {% for claim in claims %}
+                <li id="claim-{{ claim.pk }}">
+                  {{ claim.item.name }}{% if claim.note %} <span class="muted">({{ claim.note }})</span>{% endif %}
+                  <span class="admin-controls">
+                    <button type="button" class="btn-link" hx-get="{% url 'manage_claim_note' event.slug claim.pk %}"
+                            hx-target="#claim-{{ claim.pk }}" hx-swap="outerHTML">Edit note</button>
+                    <button type="button" class="btn-link danger" hx-post="{% url 'manage_claim_delete' event.slug claim.pk %}"
+                            hx-target="#responses" hx-swap="outerHTML"
+                            hx-confirm="Remove {{ attendee.name }} from “{{ claim.item.name }}”?">Remove</button>
+                  </span>
+                </li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <span class="muted">Nothing yet</span>
+            {% endif %}
+            {% endwith %}
+          </td>
+          <td>{{ attendee.created_at|date:"M j, g:i a" }}</td>
+          <td>
+            <div class="admin-controls">
+              <a href="{% url 'manage_attendee_edit' event.slug attendee.pk %}">Edit</a>
+              <button type="button" class="btn-link danger" hx-post="{% url 'manage_attendee_delete' event.slug attendee.pk %}"
+                      hx-target="#responses" hx-swap="outerHTML"
+                      hx-confirm="Delete {{ attendee.name }} and all of their signups?">Delete</button>
+            </div>
+          </td>
+        </tr>
+      {% endwith %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="empty-state">No one has signed up yet. Share the event link to start collecting signups.</p>
+{% endif %}
+</div>

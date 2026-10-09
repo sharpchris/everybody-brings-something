@@ -1,0 +1,13 @@
+{# Inline edit form for one custom field. Context: event, field, form. #}
+<article id="field-{{ field.pk }}">
+  <form method="post" action="{% url 'manage_field_edit' event.slug field.pk %}"
+        hx-post="{% url 'manage_field_edit' event.slug field.pk %}" hx-target="#fields" hx-swap="outerHTML">
+    {% csrf_token %}
+    {% include "events/manage/partials/form_fields.html" %}
+    <div class="form-actions">
+      <button type="submit">Save field</button>
+      <button type="button" class="btn-link" hx-get="{% url 'manage_event_settings' event.slug %}"
+              hx-select="#fields" hx-target="#fields" hx-swap="outerHTML">Cancel</button>
+    </div>
+  </form>
+</article>

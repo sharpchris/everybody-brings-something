@@ -1,0 +1,31 @@
+{% extends "events/manage/base.html" %}
+{% block title %}Settings · {{ event.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Event settings</h1>
+  <p>{{ event.title }} · <a href="{{ event.get_absolute_url }}">{{ request.scheme }}://{{ request.get_host }}{{ event.get_absolute_url }}</a></p>
+</hgroup>
+
+<section>
+  <h2>Details</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% include "events/manage/partials/form_fields.html" %}
+    <p class="muted"><small>Changing the slug changes the event’s link. Old links will stop working.</small></p>
+    <button type="submit">Save details</button>
+  </form>
+</section>
+
+{% include "events/manage/partials/fields.html" %}
+
+<section>
+  <h2>Delete event</h2>
+  <p class="muted">This removes the event, its categories and items, and every signup. You can’t undo it.</p>
+  <form method="post" action="{% url 'manage_event_delete' event.slug %}"
+        hx-post="{% url 'manage_event_delete' event.slug %}"
+        hx-confirm="Delete “{{ event.title }}” and all of its signups? You can’t undo this.">
+    {% csrf_token %}
+    <button type="submit" class="secondary outline">Delete event</button>
+  </form>
+</section>
+{% endblock %}

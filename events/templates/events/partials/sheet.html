@@ -1,0 +1,10 @@
+{# The whole sheet. Renders from sheet_context() alone (event, categories, me, is_admin); sheet_oob is optional. #}
+<div id="sheet"{% if sheet_oob %} hx-swap-oob="true"{% endif %}>
+  {% for category in categories %}
+    {% include "events/partials/category.html" %}
+  {% empty %}
+    {# Admins get the "No categories yet" prompt from sheet_admin_footer.html instead. #}
+    {% if not is_admin %}<p class="empty-state">The organizer hasn't added anything to bring yet. Check back soon.</p>{% endif %}
+  {% endfor %}
+  {% if is_admin %}{% include "events/manage/partials/sheet_admin_footer.html" %}{% endif %}
+</div>

@@ -1,0 +1,5 @@
+{% extends "events/manage/base.html" %}
+{% block title %}{{ heading }} · {{ event.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+{% include "events/manage/partials/sheet_form.html" %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{# Inline note editor for one claim. Context: event, item, claim, note_form. #}
+<form class="inline-form" method="post" action="{% url 'claim_note' event.slug claim.pk %}"
+      hx-post="{% url 'claim_note' event.slug claim.pk %}"
+      hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+  {% csrf_token %}
+  {% include "events/partials/form_fields.html" with form=note_form %}
+  <p class="muted"><small>Everyone can see your note, for example “gluten-free” or “bringing two”.</small></p>
+  <div class="form-actions">
+    <button type="submit">Save note</button>
+    <a class="btn-link" href="{{ event.get_absolute_url }}#item-{{ item.pk }}"
+       hx-get="{% url 'item_row' event.slug item.pk %}"
+       hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">Cancel</a>
+  </div>
+</form>

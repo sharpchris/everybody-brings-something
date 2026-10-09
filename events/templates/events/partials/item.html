@@ -1,0 +1,71 @@
+{% load sheet_tags %}
+{# One item row. Context: event, category, item (claims prefetched), me, is_admin; optional active_item_id, item_mode ("profile"/"note"), signup_form, note_form, editing_claim_id, error, just_claimed_id. #}
+{% slot_state item me as st %}
+<div class="sheet-item" id="item-{{ item.pk }}">
+  <div>
+    {# Name, count and admin icons share one line; they wrap only when the name is long. #}
+    <div class="item-head">
+      <p class="item-name">{{ item.name }}</p>
+      <span class="item-count">
+        {% if item.slots is None %}Unlimited{% if st.count %} · {{ st.count }} signed up{% endif %}{% else %}{{ st.count }} of {{ item.slots }} signed up{% endif %}
+        {% if st.over %}<span class="badge over">Oversubscribed</span>{% elif st.full %}<span class="badge full">Full</span>{% endif %}
+      </span>
+      {% if is_admin %}{% include "events/manage/partials/item_controls.html" %}{% endif %}
+    </div>
+    {% if item.description %}<p class="item-description">{{ item.description }}</p>{% endif %}
+  </div>
+
+  <div>
+    {% if error and active_item_id == item.pk %}<p class="flash error" role="alert">{{ error }}</p>{% endif %}
+    <ul class="slot-lines">
+      {% for row in st.rows %}
+        {% if item_mode == "note" and active_item_id == item.pk and editing_claim_id == row.claim.pk %}
+          <li id="claim-{{ row.claim.pk }}">{% include "events/partials/note_form.html" with claim=row.claim %}</li>
+        {% else %}
+          <li class="slot{% if row.mine %} mine{% endif %}{% if row.claim.pk == just_claimed_id %} just-claimed{% endif %}" id="claim-{{ row.claim.pk }}">
+            <span>
+              <span class="signer">{{ row.claim.attendee.name }}</span>
+              {% if row.extras or row.claim.note %}
+                <span class="signer-extra">{{ row.extras|join:" · " }}{% if row.extras and row.claim.note %} · {% endif %}{% if row.claim.note %}“{{ row.claim.note }}”{% endif %}</span>
+              {% endif %}
+            </span>
+            {% if row.mine or is_admin %}
+              <span class="slot-actions">
+                {% if row.mine %}
+                  <a class="btn-link" href="{% url 'claim_note' event.slug row.claim.pk %}"
+                     hx-get="{% url 'claim_note' event.slug row.claim.pk %}"
+                     hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">{% if row.claim.note %}Edit note{% else %}Add note{% endif %}</a>
+                {% endif %}
+                <form method="post" action="{% url 'claim_delete' event.slug row.claim.pk %}" style="margin:0"
+                      hx-post="{% url 'claim_delete' event.slug row.claim.pk %}"
+                      hx-target="#item-{{ item.pk }}" hx-swap="outerHTML"
+                      hx-confirm="{% if row.mine %}Remove your signup for {{ item.name }}?{% else %}Remove {{ row.claim.attendee.name }} from {{ item.name }}?{% endif %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-link danger">{% if row.mine %}Remove me{% else %}Remove{% endif %}</button>
+                </form>
+              </span>
+            {% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if item_mode == "profile" and active_item_id == item.pk %}
+        <li>{% include "events/partials/profile_form.html" %}</li>
+      {% else %}
+        {# Each blank line is the claim button: tap any one to take a slot. #}
+        {% for _ in st.open_lines %}
+          <li class="slot open">
+            <form method="post" action="{% url 'item_claim' event.slug item.pk %}"
+                  hx-post="{% url 'item_claim' event.slug item.pk %}"
+                  hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+              {% csrf_token %}
+              <button type="submit" class="slot-claim"
+                      aria-label="I'll bring {% if st.mine_count %}another {% endif %}{{ item.name }}">{% if st.mine_count %}I'll bring another{% else %}I'll bring this{% endif %}</button>
+            </form>
+          </li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+    {% if st.more_open and not item_mode == "profile" %}<p class="item-count">{{ st.more_open }} more open</p>{% endif %}
+  </div>
+</div>

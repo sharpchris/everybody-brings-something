@@ -1,0 +1,32 @@
+[project]
+name = "everybody-brings-something"
+version = "0.1.0"
+description = "A self-hosted signup sheet for potlucks and outings. No accounts needed."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "django-htmx>=1.29.0",
+    "gunicorn>=26.2.0",
+    "tzdata>=2026.4",
+    "whitenoise>=6.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+    "pytest-playwright>=0.9.0",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.test_settings"
+python_files = ["test_*.py"]
+# e2e/ (Playwright) only runs when asked for: `uv run pytest e2e`.
+testpaths = ["events/tests"]
+addopts = "-q"
+markers = ["e2e: browser tests in e2e/ (need `playwright install chromium`)"]
+# WhiteNoise warns when collectstatic hasn't run; tests with DEBUG off don't need it.
+filterwarnings = ["ignore:No directory at:UserWarning"]

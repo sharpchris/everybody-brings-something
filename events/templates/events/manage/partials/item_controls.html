@@ -1,0 +1,25 @@
+{% load sheet_tags %}
+{# Admin controls inside an item row. Context: event, item, category. The edit form opens below the item's title row. #}
+{% move_bounds item category as bounds %}
+<div class="admin-controls item-controls">
+  <button type="button" class="icon-btn" aria-label="Edit {{ item.name }}" title="Edit item"
+          hx-get="{% url 'manage_item_edit' event.slug item.pk %}" hx-target="closest .item-head" hx-swap="afterend"
+          hx-on::before-request="document.getElementById('item-form-{{ item.pk }}')?.remove()">{% include "events/manage/partials/icon.html" with name="pencil" %}</button>
+
+  <button type="button" class="icon-btn" aria-label="Move {{ item.name }} up" title="Move up"
+          {% if bounds.first %}disabled{% endif %}
+          hx-post="{% url 'manage_item_move' event.slug item.pk 'up' %}"
+          hx-target="#sheet" hx-swap="outerHTML">{% include "events/manage/partials/icon.html" with name="arrow-up" %}</button>
+
+  <button type="button" class="icon-btn" aria-label="Move {{ item.name }} down" title="Move down"
+          {% if bounds.last %}disabled{% endif %}
+          hx-post="{% url 'manage_item_move' event.slug item.pk 'down' %}"
+          hx-target="#sheet" hx-swap="outerHTML">{% include "events/manage/partials/icon.html" with name="arrow-down" %}</button>
+
+  {% with n=item.claims.all|length %}
+  <button type="button" class="icon-btn danger" aria-label="Delete {{ item.name }}" title="Delete item"
+          hx-post="{% url 'manage_item_delete' event.slug item.pk %}"
+          hx-target="#sheet" hx-swap="outerHTML"
+          hx-confirm="Delete “{{ item.name }}”?{% if n %} {{ n }} signup{{ n|pluralize }} will be removed too.{% endif %}">{% include "events/manage/partials/icon.html" with name="trash" %}</button>
+  {% endwith %}
+</div>

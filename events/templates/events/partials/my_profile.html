@@ -1,0 +1,28 @@
+{# "Your info" panel. Context: event, me, my_values (all of me's FieldValues, private included: it's their own data); optional panel_editing, me_form, oob. #}
+<article id="my-info" aria-labelledby="my-info-title" style="margin-bottom:2.5rem"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if panel_editing %}
+    <form method="post" action="{% url 'my_profile' event.slug %}" style="margin:0"
+          hx-post="{% url 'my_profile' event.slug %}" hx-target="#my-info" hx-swap="outerHTML">
+      {% csrf_token %}
+      <h2 id="my-info-title" style="font-size:1.1rem">Your info</h2>
+      {% include "events/partials/form_fields.html" with form=me_form %}
+      <div class="form-actions" style="display:flex;gap:0.75rem;align-items:center">
+        <button type="submit" style="width:auto;margin:0">Save my info</button>
+        <a class="btn-link" href="{{ event.get_absolute_url }}"
+           hx-get="{% url 'my_profile' event.slug %}?cancel=1" hx-target="#my-info" hx-swap="outerHTML">Cancel</a>
+      </div>
+    </form>
+  {% elif me %}
+    <h2 id="my-info-title" style="font-size:1.1rem;margin-bottom:0.5rem">Your info</h2>
+    <p style="margin-bottom:0.5rem"><strong>{{ me.name }}</strong></p>
+    {% for v in my_values %}
+      {% if v.value %}
+        <p class="muted" style="margin-bottom:0.25rem">{{ v.field.label }}: {{ v.display }}{% if not v.field.is_public %} <span class="badge private" title="Only the organizer sees this">Private</span>{% endif %}</p>
+      {% endif %}
+    {% endfor %}
+    <a class="btn-small secondary outline" role="button" href="{% url 'my_profile' event.slug %}"
+       hx-get="{% url 'my_profile' event.slug %}" hx-target="#my-info" hx-swap="outerHTML">Edit my info</a>
+  {% else %}
+    <p class="muted" id="my-info-title" style="margin:0">Pick something below to sign up. We'll ask for your name the first time.</p>
+  {% endif %}
+</article>

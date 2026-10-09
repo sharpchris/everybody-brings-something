@@ -1,0 +1,41 @@
+{% extends "events/base.html" %}
+{% load sheet_tags %}
+
+{% block title %}{{ event.title }} · {{ site_title }}{% endblock %}
+{% block body_class %}page-sheet{% endblock %}
+
+{% block admin_links %}
+  {% url 'manage_event_settings' event.slug as settings_url %}
+  {% if settings_url %}<a href="{{ settings_url }}">Event settings</a>{% endif %}
+  {% url 'manage_event_responses' event.slug as responses_url %}
+  {% if responses_url %}<a href="{{ responses_url }}">Responses</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+<header class="event-header">
+  <div class="event-title-row">
+    <h1>{{ event.title }}</h1>
+    {% if is_admin %}
+      <div class="event-admin-actions">
+        <button type="button" class="btn-small copy-link" data-copy-path="{{ event.get_absolute_url }}"
+                aria-live="polite"><span class="copy-label">Copy share link</span><span class="copied-label">Link copied</span></button>
+        <form method="post" action="{% url 'manage_guest_view' %}">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ event.get_absolute_url }}">
+          <button type="submit" class="btn-small guest-view-btn">Guest view</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+  {% if event.starts_at or event.location %}
+    <div class="event-meta">
+      {% if event.starts_at %}<time datetime="{{ event.starts_at|date:'c' }}">{{ event|event_when }}</time>{% endif %}
+      {% if event.location %}<span>{{ event.location }}</span>{% endif %}
+    </div>
+  {% endif %}
+  {% if event.description %}<div class="event-description">{{ event.description|linebreaks }}</div>{% endif %}
+</header>
+
+{% include "events/partials/my_profile.html" %}
+
+{% include "events/partials/sheet.html" %}
+{% endblock %}

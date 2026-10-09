@@ -1,0 +1,14 @@
+{% extends "events/base.html" %}
+
+{% block title %}Can't change that · {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <h1>You can't change that signup</h1>
+  <p>Only the person who signed up, or the organizer, can edit or remove a signup.
+    If it's yours, open the event in the same browser you used to sign up.</p>
+  <p class="error-actions">
+    <a href="javascript:history.back()" role="button" class="outline">Go back</a>
+  </p>
+</section>
+{% endblock %}

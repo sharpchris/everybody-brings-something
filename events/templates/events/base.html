@@ -1,0 +1,56 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}{{ site_title }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'vendor/pico.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}{% if guest_view %} guest-view{% endif %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% if guest_view %}
+  <div class="guest-bar" role="status">
+    <p><strong>Guest view</strong> <span>You're seeing this the way attendees do. Signups you make here are real.</span></p>
+    <form method="post" action="{% url 'manage_guest_view_exit' %}">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button type="submit" class="btn-small">Exit guest view</button>
+    </form>
+  </div>
+  {% endif %}
+  {% if is_admin %}
+  <div class="admin-bar" role="status">
+    <span>Admin mode</span>
+    <a href="{% url 'landing' %}">All events</a>
+    <a href="{% url 'manage_event_new' %}">New event</a>
+    <a href="{% url 'manage_site_settings' %}">Site settings</a>
+    {% block admin_links %}{% endblock %}
+    <form method="post" action="{% url 'manage_logout' %}" style="display:inline;margin:0">
+      {% csrf_token %}<button type="submit" class="btn-link" style="color:inherit">Leave admin mode</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <header class="container site-header">
+    <a class="wordmark" href="{% url 'landing' %}"><span>Everybody</span> brings <span class="thing">something</span></a>{% if site.organization %} <span class="org">– {{ site.organization }}</span>{% endif %}
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <p class="flash{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+    <p id="request-error" class="flash error" role="alert" hidden></p>
+    {% block content %}{% endblock %}
+  </main>
+  {% if site.contact_email %}
+  <footer class="container site-footer">
+    <p>Questions? Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></p>
+  </footer>
+  {% endif %}
+</body>
+</html>

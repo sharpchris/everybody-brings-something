@@ -1,0 +1,30 @@
+# Everybody Brings Something: docker compose up -d
+#
+# 1. Copy .env.example to .env and set SECRET_KEY, ADMIN_KEY and SITE_URL.
+# 2. docker compose up -d
+# 3. Open <SITE_URL>/?admin=<ADMIN_KEY> to unlock admin mode.
+#
+# SITE_URL is the address people type, and it decides HTTPS behaviour:
+#   - Plain HTTP on a home network: SITE_URL=http://192.168.1.20:8000 (or leave it
+#     empty and use http://localhost:8000). Cookies work over plain HTTP.
+#   - Behind a reverse proxy that handles HTTPS (Caddy, nginx, Traefik):
+#     SITE_URL=https://signup.example.org and BEHIND_PROXY=1, then point the proxy
+#     at this container's port 8000. Only publish the port to the proxy (for example
+#     "127.0.0.1:8000:8000"), so nobody can bypass it and spoof X-Forwarded-Proto.
+
+services:
+  web:
+    # The published image. Set EBS_IMAGE to use another (e.g. a pinned version tag).
+    # `build: .` lets you build from a source checkout with `docker compose up -d --build`.
+    image: ${EBS_IMAGE:-ghcr.io/sharpchris/everybody-brings-something:latest}
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - data:/data   # the SQLite database lives here; back it up
+    restart: unless-stopped
+    # The healthcheck (GET /health/) is defined in the image.
+
+volumes:
+  data: {}

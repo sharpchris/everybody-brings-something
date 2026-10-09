@@ -1,0 +1,11 @@
+{# One custom field row on the new-event page. Context: f (a NewEventFieldForm). #}
+<div class="field-row">
+  {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+  <label class="field-row-label">{{ f.label.label }}{{ f.label }}</label>
+  <label class="field-row-type">Type{{ f.field_type }}</label>
+  <button type="button" class="icon-btn danger field-row-remove" data-remove-field-row
+          aria-label="Remove this field" title="Remove field">{% include "events/manage/partials/icon.html" with name="trash" %}</button>
+  <label class="field-row-check field-row-required">{{ f.required }} Required</label>
+  <label class="field-row-check field-row-public">{{ f.is_public }} {{ f.is_public.label }}</label>
+  {% for field in f %}{% for error in field.errors %}<small class="field-error">{{ field.label }}: {{ error }}</small>{% endfor %}{% endfor %}
+</div>

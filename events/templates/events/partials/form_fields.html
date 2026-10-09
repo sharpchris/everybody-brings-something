@@ -1,0 +1,5 @@
+{# Renders all of a form's fields Pico-style (see field.html). Context: form. #}
+{% if form.non_field_errors %}<p class="flash error" role="alert">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+{% for field in form %}
+  {% include "events/partials/field.html" %}
+{% endfor %}

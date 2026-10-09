@@ -1,0 +1,34 @@
+{# One category. Context: event, category (items prefetched), me, is_admin; optional active_category_id, category_mode, custom_form, signup_form, custom_error, just_claimed_id. #}
+<section class="sheet-category" id="category-{{ category.pk }}">
+  <header>
+    <h2>{{ category.name }}</h2>
+    {% if is_admin %}{% include "events/manage/partials/category_controls.html" %}{% endif %}
+  </header>
+  {% if category.description %}<p class="category-description">{{ category.description }}</p>{% endif %}
+
+  {% for item in category.items.all %}
+    {% include "events/partials/item.html" %}
+  {% empty %}
+    {% if not category.allow_custom_items %}<p class="muted custom-item-add">Nothing listed here yet.</p>{% endif %}
+  {% endfor %}
+
+  {% if category.allow_custom_items %}
+    {# The write-in row: a blank item line at the bottom of the card, outlined in dashes. #}
+    <div class="write-in{% if category.custom_full %} is-full{% elif category_mode == "add" and active_category_id == category.pk %} is-open{% endif %}" id="add-category-{{ category.pk }}">
+      {% if custom_error and active_category_id == category.pk %}<p class="flash error" role="alert">{{ custom_error }}</p>{% endif %}
+      {% if category.custom_full %}
+        <p class="muted">{% if category.custom_item_limit == 1 %}The one spot for attendees' own items is taken.{% else %}All {{ category.custom_item_limit }} spots for attendees' own items are taken.{% endif %}</p>
+      {% elif category_mode == "add" and active_category_id == category.pk %}
+        {% include "events/partials/custom_item_form.html" %}
+      {% else %}
+        <a href="{% url 'category_custom_item' event.slug category.pk %}#add-category-{{ category.pk }}"
+           hx-get="{% url 'category_custom_item' event.slug category.pk %}"
+           hx-target="#category-{{ category.pk }}" hx-swap="outerHTML"
+           role="button" class="write-in-add" aria-label="Bring something else to {{ category.name }}">+ Bring something else</a>
+        {% if category.custom_spots_left is not None %}
+          <span class="spots-left">{{ category.custom_spots_left }} of {{ category.custom_item_limit }} spot{{ category.custom_item_limit|pluralize }} left</span>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+</section>

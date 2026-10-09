@@ -1,0 +1,39 @@
+# Version control and CI
+.git
+.github
+.gitignore
+
+# Python and tooling
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.coverage
+htmlcov
+node_modules
+.claude
+.playwright-mcp
+.idea
+.vscode
+**/.DS_Store
+
+# Local data, secrets and build output
+db.sqlite3*
+test_db.sqlite3*
+data
+staticfiles
+*.log
+.env
+.env.*
+
+# Not needed in the image
+e2e
+events/tests
+config/test_settings.py
+test-results
+docs
+compose.yaml
+Dockerfile
+.dockerignore
+CONTRIBUTING.md
+SECURITY.md

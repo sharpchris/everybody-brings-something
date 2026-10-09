@@ -1,0 +1,18 @@
+{% extends "events/base.html" %}
+
+{% block title %}Page not found · {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <h1>We couldn't find that page</h1>
+  <p>The event may have been renamed or removed, or the link might be missing a letter.
+    Check the link your organizer sent you, or ask them to send it again.</p>
+  <p class="error-actions">
+    {% if is_admin %}
+      <a href="{% url 'landing' %}" role="button">See all events</a>
+    {% else %}
+      <a href="{% url 'landing' %}" role="button" class="outline">Go to the home page</a>
+    {% endif %}
+  </p>
+</section>
+{% endblock %}

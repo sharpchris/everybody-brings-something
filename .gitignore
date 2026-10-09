@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local data and build output
+db.sqlite3*
+test_db.sqlite3*
+/data/
+staticfiles/
+*.log
+
+# Secrets (keep the example)
+.env
+.env.*
+!.env.example
+
+# Tests and coverage
+.pytest_cache/
+test-results/
+.coverage
+htmlcov/
+
+# Tooling
+.claude/worktrees/
+.claude/settings.local.json
+.playwright-mcp/
+.idea/
+.vscode/
+.DS_Store

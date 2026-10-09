@@ -1,0 +1,15 @@
+{# Category/item add or edit form. Context: event, form, action, form_id, heading, submit_label, standalone. #}
+<form id="{{ form_id }}" class="inline-form" method="post" action="{{ action }}"
+      {% if not standalone %}hx-post="{{ action }}" hx-target="#sheet" hx-swap="outerHTML"{% endif %}>
+  {% csrf_token %}
+  <h3>{{ heading }}</h3>
+  {% include "events/manage/partials/form_fields.html" %}
+  <div class="form-actions">
+    <button type="submit">{{ submit_label }}</button>
+    {% if standalone %}
+      <a href="{{ event.get_absolute_url }}">Cancel</a>
+    {% else %}
+      <button type="button" class="btn-link" onclick="this.closest('form').remove()">Cancel</button>
+    {% endif %}
+  </div>
+</form>

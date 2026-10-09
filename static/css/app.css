@@ -1,0 +1,1025 @@
+/* Everybody Brings Something — the fridge signup sheet.
+   Pico supplies the base; this file sets tokens and the sheet components.
+   Signature element: claimed slots show the signer's name in ballpoint handwriting
+   on a ruled line; open slots are blank dashed lines. Keep everything else quiet. */
+
+/* Fonts are served locally (no third-party requests). Both are SIL OFL 1.1; see static/vendor/fonts/. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../vendor/fonts/bricolage-grotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Caveat";
+  src: url("../vendor/fonts/caveat.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ebs-paper: #f6f8f7;
+  --ebs-surface: #ffffff;
+  --ebs-ink: #1d2b36;
+  --ebs-ink-soft: #5a6a75;
+  --ebs-rule: #cfd8d6;
+  --ebs-green: #2e7a4f;
+  --ebs-green-hover: #25653f;
+  --ebs-pen: #2446a6;
+  --ebs-amber: #b5541b;
+  --ebs-amber-bg: #fbeee4;
+  --ebs-guest: #6d47c9;
+  --ebs-on-guest: #ffffff;
+  --ebs-admin-bg: #1d2b36;
+  --ebs-admin-ink: #e8eef0;
+  --ebs-on-green: #ffffff;
+  --ebs-font-ui: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ebs-font-hand: "Caveat", "Bradley Hand", "Segoe Print", cursive;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ebs-paper: #141c22;
+    --ebs-surface: #1a242b;
+    --ebs-ink: #e6ecee;
+    --ebs-ink-soft: #9fb0b8;
+    --ebs-rule: #34444d;
+    --ebs-green: #5fbf86;
+    --ebs-green-hover: #79cf9b;
+    --ebs-pen: #8fb0ff;
+    --ebs-amber: #f0a36e;
+    --ebs-amber-bg: #3a2a1e;
+    --ebs-admin-bg: #0d1418;
+    --ebs-guest: #b49cff;
+    --ebs-on-guest: #1b1233;
+    --ebs-on-green: #0f1f16;
+  }
+}
+
+/* Map tokens onto Pico. Selector out-specifies Pico's :root:not([data-theme]) rules. */
+html:root:not([data-ebs-none]) {
+  --pico-font-family: var(--ebs-font-ui);
+  --pico-background-color: var(--ebs-paper);
+  --pico-color: var(--ebs-ink);
+  --pico-muted-color: var(--ebs-ink-soft);
+  --pico-muted-border-color: var(--ebs-rule);
+  --pico-primary: var(--ebs-green);
+  --pico-primary-background: var(--ebs-green);
+  --pico-primary-border: var(--ebs-green);
+  --pico-primary-hover: var(--ebs-green-hover);
+  --pico-primary-hover-background: var(--ebs-green-hover);
+  --pico-primary-hover-border: var(--ebs-green-hover);
+  --pico-primary-inverse: var(--ebs-on-green);
+  --pico-primary-underline: color-mix(in srgb, var(--ebs-green) 50%, transparent);
+  --pico-primary-focus: color-mix(in srgb, var(--ebs-green) 35%, transparent);
+  --pico-border-radius: 0.4rem;
+  --pico-form-element-spacing-vertical: 0.55rem;
+  --pico-form-element-spacing-horizontal: 0.8rem;
+}
+
+body {
+  background: var(--ebs-paper);
+  color: var(--ebs-ink);
+}
+
+main.container,
+header.container,
+footer.container {
+  max-width: 46rem;
+  /* Pico drops container padding above 576px; keep a gutter when the max-width exceeds the screen. */
+  padding-inline: var(--pico-spacing);
+}
+
+/* The signup sheet has two columns, so it gets more room than text pages. */
+.page-sheet main.container,
+.page-sheet header.container,
+.page-sheet footer.container {
+  max-width: 60rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 6vw, 2.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Site chrome ---------- */
+
+.site-header {
+  padding-block: 1.25rem 0.5rem;
+}
+
+.site-header .wordmark {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--ebs-ink);
+  text-decoration: none;
+}
+
+.site-header .wordmark span {
+  font-family: var(--ebs-font-hand);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--ebs-pen);
+  margin-right: 0.1em;
+}
+
+/* The organization: plain UI type after the wordmark, never part of the handwriting.
+   On a narrow phone it wraps to its own line rather than squeezing the wordmark. */
+.site-header .org {
+  display: inline-block;
+  font-size: 1.3rem;  /* same size as "brings" in the wordmark */
+  font-weight: 600;
+  color: var(--ebs-ink-soft);
+}
+
+/* "something" in green, the color of the items and the "I'll bring this" lines. */
+.site-header .wordmark .thing,
+.hand.thing {
+  color: var(--ebs-green);
+}
+
+/* "Everybody" written in the same pen as the names on the sheet. */
+.hand {
+  font-family: var(--ebs-font-hand);
+  font-weight: 600;
+  font-size: 1.2em;
+  color: var(--ebs-pen);
+  letter-spacing: 0;
+  margin-right: 0.05em;
+}
+
+.admin-bar {
+  background: var(--ebs-admin-bg);
+  color: var(--ebs-admin-ink);
+  font-size: 0.875rem;
+  padding: 0.45rem 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.admin-bar a {
+  color: var(--ebs-admin-ink);
+  text-decoration: underline;
+}
+
+.site-footer {
+  margin-block: 3rem 2rem;
+  font-size: 0.875rem;
+}
+
+/* Rule on the paragraph, not the container, so it lines up with the content's gutter. */
+.site-footer p {
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ebs-rule);
+  color: var(--ebs-ink-soft);
+}
+
+.site-footer a {
+  color: inherit;
+}
+
+.flash {
+  border-left: 3px solid var(--ebs-green);
+  background: var(--ebs-surface);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.flash.error {
+  border-color: var(--ebs-amber);
+}
+
+/* ---------- Event header ---------- */
+
+.event-header {
+  margin-block: 1.5rem 2.5rem;
+}
+
+/* Title on the left; the admin's "Copy share link" button on the right (wraps below on phones). */
+.event-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.event-title-row h1 {
+  margin: 0;
+}
+
+/* Admin actions to the right of the title: copy the link, preview as a guest. */
+.event-admin-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.event-admin-actions form {
+  margin: 0;
+}
+
+.event-admin-actions button,
+.event-admin-actions .btn-small {
+  width: 100%;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Both labels share one grid cell, so the button keeps the width of the longer one. */
+.copy-link {
+  display: inline-grid;
+  justify-items: center;
+}
+
+.copy-link > span {
+  grid-area: 1 / 1;
+}
+
+.copy-link .copied-label,
+.copy-link.copied .copy-label {
+  visibility: hidden;
+}
+
+.copy-link.copied .copied-label {
+  visibility: visible;
+}
+
+.event-admin-actions .guest-view-btn {
+  background: none;
+  border-color: var(--ebs-guest);
+  color: var(--ebs-guest);
+}
+
+/* Guest view: a colored frame around the window and a banner, so it's obvious this
+   isn't the admin view. */
+body.guest-view::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  border: 6px solid var(--ebs-guest);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.guest-bar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
+  background: var(--ebs-guest);
+  color: var(--ebs-on-guest);
+  font-size: 0.9rem;
+}
+
+.guest-bar p {
+  margin: 0;
+  color: inherit;
+}
+
+.guest-bar strong {
+  margin-right: 0.5rem;
+}
+
+.guest-bar form {
+  margin: 0 0 0 auto;  /* stays at the right, even when it wraps on phones */
+}
+
+.guest-bar button {
+  width: auto;
+  margin: 0;
+  background: var(--ebs-on-guest);
+  border-color: var(--ebs-on-guest);
+  color: var(--ebs-guest);
+  font-weight: 600;
+}
+
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  color: var(--ebs-ink-soft);
+  margin-bottom: 1rem;
+}
+
+.event-description {
+  max-width: 38rem;
+}
+
+/* ---------- The sheet ---------- */
+
+/* Each category is a card with a tinted header strip, so its items read as one group. */
+.sheet-category {
+  --card-pad: 1rem;
+  --card-radius: 0.6rem;
+  background: var(--ebs-surface);
+  border: 1px solid var(--ebs-rule);
+  border-radius: var(--card-radius);
+  margin-bottom: 2rem;
+}
+
+.sheet-category > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  background: color-mix(in srgb, var(--ebs-green) 8%, var(--ebs-surface));
+  border-bottom: 1px solid var(--ebs-rule);
+  /* Rounded to match the card, rather than clipping the card (which would clip focus rings). */
+  border-radius: calc(var(--card-radius) - 1px) calc(var(--card-radius) - 1px) 0 0;
+  padding: 0.6rem var(--card-pad);
+  margin-bottom: 0;
+}
+
+.sheet-category > header h2 {
+  margin: 0;
+}
+
+.sheet-category > .category-description {
+  color: var(--ebs-ink-soft);
+  margin: 0;
+  padding: 0.6rem var(--card-pad) 0;
+}
+
+/* Add/edit forms opened under the header sit inside the card's padding. */
+.sheet-category > .inline-form {
+  margin: 0.75rem var(--card-pad);
+}
+
+.sheet-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem 1.5rem;
+  padding: 0.9rem var(--card-pad);
+  border-bottom: 1px solid var(--ebs-rule);
+}
+
+/* No rule under the last item when nothing follows it; the card border closes the group. */
+.sheet-category > .sheet-item:last-child {
+  border-bottom: 0;
+  /* Match the card's corners so the hover background doesn't poke out. */
+  border-radius: 0 0 calc(var(--card-radius) - 1px) calc(var(--card-radius) - 1px);
+}
+
+/* Hovering or focusing a row ties the item name to its blank lines. */
+.sheet-item:hover,
+.sheet-item:focus-within {
+  background: color-mix(in srgb, var(--ebs-green) 6%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sheet-item {
+    transition: background-color 120ms ease-out;
+  }
+}
+
+@media (max-width: 600px) {
+  .sheet-category {
+    --card-pad: 0.75rem;
+  }
+
+  .sheet-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sheet-item .item-name {
+  font-weight: 600;
+  margin: 0;
+}
+
+.sheet-item .item-description {
+  color: var(--ebs-ink-soft);
+  font-size: 0.9rem;
+  margin: 0.15rem 0 0;
+}
+
+.sheet-item .item-count {
+  color: var(--ebs-ink-soft);
+  font-size: 0.85rem;
+  margin: 0.35rem 0 0;
+}
+
+.item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+}
+
+.item-head .item-count {
+  margin: 0;
+}
+
+.item-head .item-controls {
+  margin: 0 0 0 auto;
+}
+
+.slot-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.slot-lines li {
+  list-style: none;
+  margin: 0;
+}
+
+/* One ruled line per slot. */
+.slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.4rem;
+  border-bottom: 1px solid var(--ebs-rule);
+  padding-bottom: 0.15rem;
+}
+
+/* An open slot is the claim button itself: a blank dashed line that reads "I'll bring this". */
+.slot.open {
+  display: block;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.slot.open form {
+  margin: 0;
+}
+
+.slot-lines button.slot-claim {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 2.4rem;
+  margin: 0;
+  padding: 0 0.35rem 0.15rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ebs-green) 45%, var(--ebs-rule));
+  border-radius: 0;
+  box-shadow: none;
+  /* Green script = something you can do (names you've signed are blue). */
+  color: var(--ebs-green);
+  font-family: var(--ebs-font-hand);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slot-lines button.slot-claim:hover,
+.slot-lines button.slot-claim:focus-visible {
+  background: color-mix(in srgb, var(--ebs-green) 9%, transparent);
+  border-bottom-color: var(--ebs-green);
+  color: var(--ebs-green-hover);
+}
+
+.slot-lines button.slot-claim:focus-visible {
+  outline: 2px solid var(--ebs-green);
+  outline-offset: 2px;
+  border-radius: 0.2rem 0.2rem 0 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slot-lines button.slot-claim {
+    transition: color 120ms ease-out, background-color 120ms ease-out;
+  }
+}
+
+.slot .signer {
+  font-family: var(--ebs-font-hand);
+  font-size: 1.55rem;
+  line-height: 1.1;
+  color: var(--ebs-pen);
+}
+
+.slot .signer-extra {
+  display: block;
+  font-family: var(--ebs-font-ui);
+  font-size: 0.8rem;
+  color: var(--ebs-ink-soft);
+  line-height: 1.3;
+}
+
+.slot .slot-actions {
+  display: flex;
+  align-self: center;  /* the slot itself aligns to the line; actions sit mid-height */
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* "Edit note" is a link and "Remove me" a button in a form; give them identical boxes. */
+.slot .slot-actions form {
+  display: flex;
+}
+
+.slot .slot-actions .btn-link {
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.slot.mine .signer::after {
+  content: "(you)";
+  /* A real gap: a leading space collapses against the handwriting's slanted overhang. */
+  margin-left: 0.45em;
+  font-family: var(--ebs-font-ui);
+  font-size: 0.75rem;
+  color: var(--ebs-ink-soft);
+}
+
+/* Small inline buttons used on slot lines and admin controls. */
+.btn-small,
+button.btn-small,
+a.btn-small {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.85rem;
+  margin: 0;
+  width: auto;
+}
+
+.btn-link,
+button.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  color: var(--pico-primary);
+  text-decoration: underline;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-link.danger {
+  color: var(--ebs-amber);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--ebs-rule);
+  color: var(--ebs-ink-soft);
+  vertical-align: middle;
+}
+
+.badge.full {
+  border-color: var(--ebs-amber);
+  color: var(--ebs-amber);
+}
+
+.badge.over {
+  background: var(--ebs-amber-bg);
+  border-color: var(--ebs-amber);
+  color: var(--ebs-amber);
+}
+
+.badge.private {
+  border-style: dashed;
+}
+
+/* Inline forms (note entry, profile, custom item) that htmx swaps into a slot. */
+.inline-form {
+  background: var(--ebs-surface);
+  border: 1px solid var(--ebs-rule);
+  border-radius: var(--pico-border-radius);
+  padding: 1rem;
+  margin-block: 0.5rem;
+}
+
+/* Inside a category card, use the page tone so a form isn't a white box in a white box. */
+.sheet-category .inline-form {
+  background: var(--ebs-paper);
+}
+
+.inline-form .form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.inline-form .form-actions button {
+  width: auto;
+  margin: 0;
+}
+
+.custom-item-add {
+  padding: 0.9rem var(--card-pad, 0);
+  margin: 0;
+}
+
+/* Write-in row: the last line of a category card, a blank item outlined in dashes. */
+.write-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin: 0.75rem var(--card-pad) var(--card-pad);
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--ebs-rule);
+  border-radius: var(--pico-border-radius);
+}
+
+.write-in > p,
+.write-in > .flash,
+.write-in > form {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* Styled like an item name that hasn't been written yet. */
+.write-in a.write-in-add[role="button"] {
+  display: inline;
+  width: auto;
+  margin: 0;
+  padding: 0 0 0.1rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ebs-green) 45%, transparent);
+  border-radius: 0;
+  box-shadow: none;
+  /* Same green script as "I'll bring this": both are things you can do. */
+  color: var(--ebs-green);
+  font-family: var(--ebs-font-hand);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.15;
+  text-decoration: none;
+}
+
+.write-in:has(.write-in-add:hover),
+.write-in:has(.write-in-add:focus-visible) {
+  border-color: var(--ebs-green);
+  background: color-mix(in srgb, var(--ebs-green) 6%, transparent);
+}
+
+.write-in a.write-in-add[role="button"]:hover,
+.write-in a.write-in-add[role="button"]:focus-visible {
+  color: var(--ebs-green-hover);
+  border-bottom-color: var(--ebs-green);
+}
+
+.write-in a.write-in-add[role="button"]:focus-visible {
+  outline: 2px solid var(--ebs-green);
+  outline-offset: 3px;
+  border-radius: 0.15rem;
+}
+
+.write-in .spots-left {
+  color: var(--ebs-ink-soft);
+  font-size: 0.85rem;
+}
+
+/* With the form open, the row becomes the form's box. */
+.write-in.is-open {
+  background: var(--ebs-paper);
+  padding: 1rem;
+}
+
+.write-in.is-open .inline-form {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.write-in.is-full {
+  border-style: solid;
+  background: var(--ebs-paper);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .write-in {
+    transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  }
+}
+
+/* Admin edit controls shown on the public page. */
+.admin-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+/* Icon buttons (admin): small outlined boxes matching the "+ item" button.
+   The button's aria-label carries the meaning; the SVG is decorative. */
+.icon-btn,
+button.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 1px solid var(--ebs-green);
+  border-radius: var(--pico-border-radius);
+  color: var(--ebs-green);
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ebs-green) 10%, transparent);
+}
+
+.icon-btn.danger {
+  border-color: var(--ebs-amber);
+  color: var(--ebs-amber);
+}
+
+.icon-btn.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ebs-amber) 10%, transparent);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--ebs-green);
+  outline-offset: 1px;
+}
+
+.icon-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Item rows: same boxes, a touch smaller so they don't outweigh the item name. */
+.item-controls {
+  gap: 0.25rem;
+}
+
+.item-controls .icon-btn {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.category-controls {
+  gap: 0.25rem;
+}
+
+.category-controls .add-item {
+  display: inline-flex;
+  align-items: center;
+  height: 1.75rem;
+  padding-block: 0;
+  margin-right: 0.35rem;
+}
+
+.category-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--ebs-ink-soft);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.category-switch input[role="switch"] {
+  margin: 0;
+}
+
+/* Phones: icons stay on one line; the labelled toggle drops to its own line below. */
+@media (max-width: 600px) {
+  .category-switch {
+    order: 1;
+    flex-basis: 100%;
+    margin: 0.35rem 0 0;
+  }
+}
+
+/* Category form: the cap only matters while attendees can add items. */
+form:has(input[name="allow_custom_items"]:not(:checked)) :is(.field-custom_item_limit, .field-unlimited_custom),
+form:has(input[name="unlimited_custom"]:checked) .field-custom_item_limit {
+  display: none;
+}
+
+/* A short confirmation ("Field added") that fades away on its own. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 1001;
+  margin: 0;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--pico-border-radius);
+  background: var(--ebs-admin-bg);
+  color: var(--ebs-admin-ink);
+  font-size: 0.9rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.18);
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: ebs-toast 2.6s ease-in-out forwards;
+}
+
+@keyframes ebs-toast {
+  0% { opacity: 0; transform: translate(-50%, 0.5rem); }
+  10%, 75% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No movement or fade: show it, then hide it. */
+  @keyframes ebs-toast {
+    0%, 85% { opacity: 1; transform: translateX(-50%); }
+    100% { opacity: 0; transform: translateX(-50%); visibility: hidden; }
+  }
+}
+
+/* New-event page: optional custom fields, collapsed until opened. */
+.new-event-fields {
+  margin-block: 0.5rem 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ebs-rule);
+  border-radius: var(--pico-border-radius);
+  background: var(--ebs-surface);
+}
+
+.new-event-fields summary {
+  font-weight: 600;
+}
+
+.new-event-fields[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.field-rows {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) auto;
+  grid-template-areas:
+    "question type remove"
+    "required public .";
+  gap: 0.25rem 1rem;
+  align-items: end;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--ebs-rule);
+}
+
+.field-row-label { grid-area: question; }
+.field-row-type { grid-area: type; }
+.field-row-remove { grid-area: remove; margin-bottom: 0.35rem; }
+.field-row-required { grid-area: required; }
+.field-row-public { grid-area: public; }
+
+.field-rows-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.field-rows-actions button {
+  margin: 0;
+  width: auto;
+}
+
+.field-row label {
+  margin: 0;
+}
+
+.field-row input:not([type="checkbox"]),
+.field-row select {
+  margin: 0.25rem 0 0;
+}
+
+.field-row-check {
+  font-size: 0.9rem;
+}
+
+.field-row .field-error {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "question remove"
+      "type type"
+      "required required"
+      "public public";
+  }
+}
+
+.field-error {
+  display: block;
+  color: var(--ebs-amber);
+}
+
+/* Yes/No answers side by side. */
+fieldset.choice-group {
+  margin-bottom: var(--pico-spacing);
+}
+fieldset.choice-group label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 1.5rem;
+}
+
+/* Keep short submit labels on one line inside Pico's role="group" fieldsets. */
+fieldset[role="group"] button {
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--ebs-ink-soft);
+}
+
+.empty-state {
+  border: 1px dashed var(--ebs-rule);
+  border-radius: var(--pico-border-radius);
+  padding: 1.5rem;
+  color: var(--ebs-ink-soft);
+}
+
+.home-message > :last-child {
+  margin-bottom: 0;
+}
+
+/* Home page heading: the organization sits on its own line, smaller and quieter. */
+h1 .org {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.6em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ebs-ink-soft);
+}
+
+/* 404 / 403 pages */
+.error-page {
+  margin-block: 3rem 4rem;
+}
+
+.error-page p {
+  max-width: 38rem;
+  color: var(--ebs-ink-soft);
+}
+
+.error-page .error-actions a {
+  width: auto;
+}
+
+/* Responses table (admin) */
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* htmx request feedback */
+.htmx-request.sheet-item,
+.htmx-request .slot-actions {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slot.just-claimed .signer {
+    animation: ebs-write 450ms ease-out;
+  }
+
+  @keyframes ebs-write {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{# Custom fields manager on the settings page. Context: event, fields (annotated with answered), field_form; optional fields_error, fields_notice. #}
+<section id="fields">
+  {% if fields_notice %}<p class="toast" role="status">{{ fields_notice }}</p>{% endif %}
+  <h2>Custom fields</h2>
+  {% if fields_error %}<p class="flash error" role="alert">{{ fields_error }}</p>{% endif %}
+  <p class="muted">Everyone gives their name when they sign up. Add fields here to ask for anything else.
+    Answers are private, seen only by admins, unless you tick “Visible to other attendees”.</p>
+  {% for field in fields %}
+    <article id="field-{{ field.pk }}">
+      <p>
+        <strong>{{ field.label }}</strong>
+        <span class="badge">{{ field.get_field_type_display }}</span>
+        {% if field.required %}<span class="badge">required</span>{% endif %}
+        {% if field.is_public %}<span class="badge">public</span>{% else %}<span class="badge private">private</span>{% endif %}
+      </p>
+      {% if field.help_text %}<p class="muted"><small>{{ field.help_text }}</small></p>{% endif %}
+      <div class="admin-controls">
+        <button type="button" class="btn-link" hx-get="{% url 'manage_field_edit' event.slug field.pk %}"
+                hx-target="#field-{{ field.pk }}" hx-swap="outerHTML">Edit</button>
+        <button type="button" class="btn-link" hx-post="{% url 'manage_field_move' event.slug field.pk 'up' %}"
+                hx-target="#fields" hx-swap="outerHTML" aria-label="Move {{ field.label }} up">Move up</button>
+        <button type="button" class="btn-link" hx-post="{% url 'manage_field_move' event.slug field.pk 'down' %}"
+                hx-target="#fields" hx-swap="outerHTML" aria-label="Move {{ field.label }} down">Move down</button>
+        <button type="button" class="btn-link" hx-post="{% url 'manage_field_toggle' event.slug field.pk 'required' %}"
+                hx-target="#fields" hx-swap="outerHTML">{% if field.required %}Make optional{% else %}Make required{% endif %}</button>
+        <button type="button" class="btn-link" hx-post="{% url 'manage_field_toggle' event.slug field.pk 'public' %}"
+                hx-target="#fields" hx-swap="outerHTML"
+                {% if not field.is_public and field.answered %}hx-vals='{"confirm": "1"}'
+                hx-confirm="{{ field.answered }} {% if field.answered == 1 %}person{% else %}people{% endif %} answered “{{ field.label }}” while it was private. Make their answers visible to everyone?"{% endif %}>{% if field.is_public %}Make private{% else %}Make public{% endif %}</button>
+        <button type="button" class="btn-link danger" hx-post="{% url 'manage_field_delete' event.slug field.pk %}"
+                hx-target="#fields" hx-swap="outerHTML"
+                hx-confirm="Delete “{{ field.label }}”? Everyone’s answers to it will be deleted too.">Delete</button>
+      </div>
+    </article>
+  {% empty %}
+    <p class="empty-state">No custom fields yet, so attendees only give their name.</p>
+  {% endfor %}
+
+  <form class="inline-form" method="post" action="{% url 'manage_field_add' event.slug %}"
+        hx-post="{% url 'manage_field_add' event.slug %}" hx-target="#fields" hx-swap="outerHTML">
+    {% csrf_token %}
+    <h3>Add a field</h3>
+    {% include "events/manage/partials/form_fields.html" with form=field_form %}
+    <div class="form-actions"><button type="submit">Add field</button></div>
+  </form>
+</section>

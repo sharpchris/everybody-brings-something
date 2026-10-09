@@ -1,0 +1,14 @@
+{% extends "events/manage/base.html" %}
+{% block title %}Edit note · {{ event.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<h1>Edit note</h1>
+<p>{{ claim.attendee.name }} · {{ claim.item.name }}</p>
+<form method="post">
+  {% csrf_token %}
+  {% include "events/manage/partials/form_fields.html" %}
+  <div class="form-actions">
+    <button type="submit">Save note</button>
+    <a href="{% url 'manage_event_responses' event.slug %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

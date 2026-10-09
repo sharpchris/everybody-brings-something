@@ -1,0 +1,14 @@
+{% extends "events/manage/base.html" %}
+{% block title %}Site settings · {{ site_title }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Site settings</h1>
+  <p>These apply to every event on this site.</p>
+</hgroup>
+
+<form method="post" class="site-settings-form">
+  {% csrf_token %}
+  {% include "events/manage/partials/form_fields.html" %}
+  <button type="submit">Save settings</button>
+</form>
+{% endblock %}

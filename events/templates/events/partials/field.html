@@ -1,0 +1,20 @@
+{# One form field, Pico-style. Context: field. Fields may carry ebs_visibility ("public"/"private"). #}
+{% if field.widget_type == "checkbox" %}
+  <label for="{{ field.id_for_label }}">{{ field }} {{ field.label }}</label>
+{% elif field.widget_type == "radioselect" %}
+  <fieldset class="choice-group">
+    <legend>{{ field.label }}</legend>
+    {% for choice in field %}<label for="{{ choice.id_for_label }}">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+{% else %}
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+{% endif %}
+{% if field.errors %}
+  <small id="{{ field.auto_id }}_error">{{ field.errors|join:" " }}</small>
+{% elif field.help_text or field.field.ebs_visibility %}
+  <small>
+    {% if field.help_text %}{{ field.help_text }} {% endif %}
+    {% if field.field.ebs_visibility == "private" %}<span class="badge private">Private</span> Only the organizer sees this.{% elif field.field.ebs_visibility == "public" %}Shown next to your name on the sheet.{% endif %}
+  </small>
+{% endif %}

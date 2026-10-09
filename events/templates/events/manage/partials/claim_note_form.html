@@ -1,0 +1,14 @@
+{# Inline note editor for one claim in the responses table. Context: event, claim, form. #}
+<li id="claim-{{ claim.pk }}">
+  <form class="inline-form" method="post" action="{% url 'manage_claim_note' event.slug claim.pk %}"
+        hx-post="{% url 'manage_claim_note' event.slug claim.pk %}" hx-target="#responses" hx-swap="outerHTML">
+    {% csrf_token %}
+    <strong>{{ claim.item.name }}</strong>
+    {% include "events/manage/partials/form_fields.html" %}
+    <div class="form-actions">
+      <button type="submit" class="btn-small">Save note</button>
+      <button type="button" class="btn-link" hx-get="{% url 'manage_event_responses' event.slug %}"
+              hx-select="#responses" hx-target="#responses" hx-swap="outerHTML">Cancel</button>
+    </div>
+  </form>
+</li>

@@ -1,0 +1,29 @@
+{% extends "events/manage/base.html" %}
+{% block title %}New event · {{ site_title }}{% endblock %}
+{% block content %}
+<h1>New event</h1>
+<p class="muted">Start with the basics. You’ll add categories and items on the event page next.</p>
+<form method="post">
+  {% csrf_token %}
+  {% include "events/manage/partials/form_fields.html" %}
+
+  <details class="new-event-fields"{% if field_formset.is_bound and field_formset.has_changed %} open{% endif %}>
+    <summary>Add custom fields <span class="muted">(optional)</span></summary>
+    <p class="muted">Everyone gives their name when they sign up. Ask for anything else here, like a phone
+      number or how many guests they're bringing. Answers are private to you unless you make them visible.
+      You can change these later under Event settings.</p>
+    {{ field_formset.management_form }}
+    {% for error in field_formset.non_form_errors %}<p class="flash error">{{ error }}</p>{% endfor %}
+    <div class="field-rows" data-field-rows>
+      {% for f in field_formset %}{% include "events/manage/partials/new_field_row.html" %}{% endfor %}
+    </div>
+    <template data-field-row-template>{% with f=field_formset.empty_form %}{% include "events/manage/partials/new_field_row.html" %}{% endwith %}</template>
+    <p class="field-rows-actions">
+      <button type="button" class="outline btn-small" data-add-field-row>+ Add another field</button>
+      <small class="muted">Rows with no question are skipped.</small>
+    </p>
+  </details>
+
+  <button type="submit">Create event</button>
+</form>
+{% endblock %}

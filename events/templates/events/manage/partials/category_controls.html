@@ -1,0 +1,38 @@
+{# Admin controls inside a category's <header>. Context: event, category. Forms open just below the header. #}
+{% load sheet_tags %}{% category_bounds category as bounds %}
+<div class="admin-controls category-controls">
+  <button type="button" class="btn-small outline add-item"
+          aria-label="Add suggested item to {{ category.name }}" title="Add a suggested item"
+          hx-get="{% url 'manage_item_add' event.slug category.pk %}" hx-target="closest header" hx-swap="afterend"
+          hx-on::before-request="document.getElementById('item-form-new-{{ category.pk }}')?.remove()">+ suggested item</button>
+
+  <button type="button" class="icon-btn" aria-label="Move {{ category.name }} up" title="Move up"
+          {% if bounds.first %}disabled{% endif %}
+          hx-post="{% url 'manage_category_move' event.slug category.pk 'up' %}"
+          hx-target="#sheet" hx-swap="outerHTML">{% include "events/manage/partials/icon.html" with name="arrow-up" %}</button>
+
+  <button type="button" class="icon-btn" aria-label="Move {{ category.name }} down" title="Move down"
+          {% if bounds.last %}disabled{% endif %}
+          hx-post="{% url 'manage_category_move' event.slug category.pk 'down' %}"
+          hx-target="#sheet" hx-swap="outerHTML">{% include "events/manage/partials/icon.html" with name="arrow-down" %}</button>
+
+  <label class="category-switch" title="Let attendees add their own items to {{ category.name }}">
+    <input type="checkbox" role="switch" name="allow_custom_items"
+           aria-label="Attendees can add items to {{ category.name }}"
+           {% if category.allow_custom_items %}checked{% endif %}
+           hx-post="{% url 'manage_category_toggle_custom' event.slug category.pk %}" hx-trigger="change"
+           hx-target="#sheet" hx-swap="outerHTML">
+    <span aria-hidden="true">Attendees can add{% if category.allow_custom_items and category.custom_item_limit %} up to {{ category.custom_item_limit }}{% endif %}</span>
+  </label>
+
+  <button type="button" class="icon-btn" aria-label="Edit {{ category.name }}" title="Edit category"
+          hx-get="{% url 'manage_category_edit' event.slug category.pk %}" hx-target="closest header" hx-swap="afterend"
+          hx-on::before-request="document.getElementById('category-form-{{ category.pk }}')?.remove()">{% include "events/manage/partials/icon.html" with name="pencil" %}</button>
+
+  {% with n=category.items.all|length %}
+  <button type="button" class="icon-btn danger" aria-label="Delete {{ category.name }}" title="Delete category"
+          hx-post="{% url 'manage_category_delete' event.slug category.pk %}"
+          hx-target="#sheet" hx-swap="outerHTML"
+          hx-confirm="Delete the category “{{ category.name }}”{% if n %} and its {{ n }} item{{ n|pluralize }}, along with their signups{% endif %}?">{% include "events/manage/partials/icon.html" with name="trash" %}</button>
+  {% endwith %}
+</div>
