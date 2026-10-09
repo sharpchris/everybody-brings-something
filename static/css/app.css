@@ -137,11 +137,12 @@ h2 {
 
 /* The organization: plain UI type after the wordmark, never part of the handwriting.
    On a narrow phone it wraps to its own line rather than squeezing the wordmark. */
+/* Matches "brings": same size, weight and color. */
 .site-header .org {
   display: inline-block;
-  font-size: 1.3rem;  /* same size as "brings" in the wordmark */
-  font-weight: 600;
-  color: var(--ebs-ink-soft);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ebs-ink);
 }
 
 /* "something" in green, the color of the items and the "I'll bring this" lines. */
@@ -979,9 +980,9 @@ h1 .org {
   display: block;
   margin-top: 0.35rem;
   font-size: 0.6em;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--ebs-ink-soft);
+  color: var(--ebs-ink);
 }
 
 /* 404 / 403 pages */
