@@ -178,7 +178,9 @@ Migrations run automatically when the container starts. Take a backup first.
 
 1. Create a service from this GitHub repo.
 2. Add a volume yourself; the repo can't create one. In the project canvas, right-click the service (or press `⌘K` / `Ctrl+K`), choose **Attach volume**, and set the mount path to `/data`. The database lives at `/data/db.sqlite3`, so this volume is what keeps your events across deploys and restarts. Without it the deploy won't start (`railway.json` requires the mount), and without that check everything would be wiped on every deploy. Railway mounts volumes as root; the container fixes the ownership on startup, so no extra setting is needed.
-3. Optionally set `SECRET_KEY` and `ADMIN_KEY` under Variables. If you don't, random ones are generated into the volume on first deploy and the admin link appears once in the deploy logs (or run `python manage.py admin_link` in the service's shell). Leave `DEBUG` unset.
+3. Set `SECRET_KEY` and `ADMIN_KEY` under Variables (recommended on Railway). That keeps the keys in the dashboard, where you can copy or change them; changing `ADMIN_KEY` redeploys and logs every admin out. Generate each value with `openssl rand -hex 32` and paste it in. If you turn this project into a [Railway template](https://docs.railway.com/templates/create#template-variable-functions), use `${{secret(64, "abcdef0123456789")}}` as the value so each deploy gets its own key (letters and digits only, so it's safe in the admin link). Leave `DEBUG` unset.
+
+   Variables always win. If you skip this step, random keys are generated into the volume on the first deploy instead, the admin link appears once in the deploy logs, and `python manage.py admin_link` in the service's shell (`railway ssh`) shows it again.
 4. Generate a domain under Settings → Networking. `SITE_URL` defaults to `https://$RAILWAY_PUBLIC_DOMAIN` and `BEHIND_PROXY` defaults on. For a custom domain, set `SITE_URL` to it.
 5. Keep the service at 1 replica (SQLite on a volume can't be shared) and turn on backups in the volume's settings.
 
