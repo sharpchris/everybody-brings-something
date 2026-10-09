@@ -36,9 +36,11 @@
   </div>
   {% endif %}
 
+  {% block site_header %}
   <header class="container site-header">
     <a class="wordmark" href="{% url 'landing' %}"><span>Everybody</span> brings <span class="thing">something</span></a>{% if site.organization %} <span class="org">– {{ site.organization }}</span>{% endif %}
   </header>
+  {% endblock %}
 
   <main class="container">
     {% if messages %}

@@ -1,6 +1,9 @@
 {% extends "events/base.html" %}
 {% load sheet_tags %}
 
+{# Visitors see the big wordmark as the page heading, so skip the small one in the header. #}
+{% block site_header %}{% if is_admin %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block content %}
 {% if is_admin %}
   <header class="event-header">
