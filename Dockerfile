@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage: install dependencies into /app/.venv with uv ----
-FROM python:3.13-slim AS builder
+FROM python:3.14-slim AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.12.24 /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -18,7 +18,7 @@ COPY . .
 RUN uv sync --frozen --no-dev
 
 # ---- Runtime stage ----
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 LABEL org.opencontainers.image.title="Everybody Brings Something" \
       org.opencontainers.image.description="A self-hosted signup sheet for potlucks and outings. No accounts needed." \
